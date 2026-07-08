@@ -28,6 +28,7 @@ load_dotenv()
 
 POSTED_LOG = Path("posted_items.json")
 TIP_LOG = Path("posted_tips.json")
+KEYWORD_INDEX_LOG = Path("keyword_index.json")
 
 # どのプラットフォームに投稿するか
 ENABLE_X = True
@@ -69,6 +70,37 @@ def load_post_count():
 
 def save_post_count(count):
     POST_COUNT_LOG.write_text(json.dumps({"count": count}))
+
+
+def get_keyword_list():
+    """
+    RAKUTEN_KEYWORDS（カンマ区切り）が設定されていればそれをローテーション対象にする。
+    未設定の場合は従来通り RAKUTEN_SEARCH_KEYWORD 単体を使う（ローテーションなし）。
+    例: RAKUTEN_KEYWORDS="掃除機,ふるさと納税,サブスク,家電,クレジットカード"
+    """
+    raw = os.environ.get("RAKUTEN_KEYWORDS", "")
+    keywords = [k.strip() for k in raw.split(",") if k.strip()]
+    if keywords:
+        return keywords
+    single = os.environ.get("RAKUTEN_SEARCH_KEYWORD")
+    return [single] if single else ["日用品"]
+
+
+def peek_current_keyword():
+    """現在のローテーション位置のキーワードを返す（状態は変更しない）"""
+    keywords = get_keyword_list()
+    if KEYWORD_INDEX_LOG.exists():
+        index = json.loads(KEYWORD_INDEX_LOG.read_text())["index"]
+    else:
+        index = 0
+    index = index % len(keywords)
+    return keywords[index], index
+
+
+def advance_keyword_rotation(index, keywords):
+    """ローテーション位置を1つ進めて保存する（本番投稿時のみ呼ぶ）"""
+    next_index = (index + 1) % len(keywords)
+    KEYWORD_INDEX_LOG.write_text(json.dumps({"index": next_index}))
 
 
 def get_settings():
@@ -129,8 +161,12 @@ def run_product_post():
     dry_run, require_approval = get_settings()
     posted = load_posted_codes()
 
+    keywords = get_keyword_list()
+    keyword, keyword_index = peek_current_keyword()
+    print(f"今回の検索キーワード: {keyword}")
+
     items = search_items(
-        keyword=os.environ.get("RAKUTEN_SEARCH_KEYWORD"),
+        keyword=keyword,
         genre_id=os.environ.get("RAKUTEN_GENRE_ID") or None,
         min_price=os.environ.get("RAKUTEN_MIN_PRICE") or None,
         max_price=os.environ.get("RAKUTEN_MAX_PRICE") or None,
@@ -182,6 +218,7 @@ def run_product_post():
 
     if not dry_run:
         save_posted_code(item["itemCode"], posted)
+        advance_keyword_rotation(keyword_index, keywords)
 
 
 if __name__ == "__main__":
