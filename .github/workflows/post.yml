@@ -48,16 +48,12 @@ jobs:
 
       - name: 投稿済みリストの変化をリポジトリに保存
         run: |
-          echo "--- 現在の作業ディレクトリ ---"
-          pwd
-          echo "--- ファイル一覧 ---"
-          ls -la
           git config user.name "auto-poster-bot"
           git config user.email "auto-poster-bot@users.noreply.github.com"
-          echo "--- git status (add前) ---"
-          git status
-          git add posted_items.json posted_tips.json post_count.json keyword_index.json latest_item.json
-          echo "--- git status (add後) ---"
-          git status
+          for f in posted_items.json posted_tips.json post_count.json keyword_index.json latest_item.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
           git diff --cached --quiet || git commit -m "chore: 投稿履歴を更新"
           git push
