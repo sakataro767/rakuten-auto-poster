@@ -38,6 +38,9 @@ jobs:
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_SITE_URL: ${{ secrets.RAKUTEN_SITE_URL }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ACCOUNT_ID: ${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          ENABLE_INSTAGRAM: "true"
           RAKUTEN_KEYWORDS: "ふるさと納税,省エネ家電,消耗品,日用品,マネー本,節約 本"
           RAKUTEN_MIN_PRICE: ""
           RAKUTEN_MAX_PRICE: "50000"
