@@ -29,6 +29,7 @@ load_dotenv()
 POSTED_LOG = Path("posted_items.json")
 TIP_LOG = Path("posted_tips.json")
 KEYWORD_INDEX_LOG = Path("keyword_index.json")
+LATEST_ITEM_LOG = Path("latest_item.json")
 
 # どのプラットフォームに投稿するか
 ENABLE_X = True
@@ -49,6 +50,23 @@ def load_posted_codes():
 def save_posted_code(item_code, posted):
     posted.add(item_code)
     POSTED_LOG.write_text(json.dumps(list(posted), ensure_ascii=False))
+
+
+def save_latest_item(item, affiliate_url):
+    """
+    直近で投稿した商品の情報を保存する。
+    リンクまとめページ(index.html)がこのファイルをfetchで読みに来て、
+    「今日のおすすめ商品」の表示・リンクを自動更新するために使う。
+    """
+    import datetime
+    data = {
+        "name": item["itemName"],
+        "price": item["itemPrice"],
+        "shop": item.get("shopName", ""),
+        "url": affiliate_url,
+        "updated_at": datetime.datetime.utcnow().isoformat() + "Z",
+    }
+    LATEST_ITEM_LOG.write_text(json.dumps(data, ensure_ascii=False))
 
 
 def load_posted_tips():
@@ -219,6 +237,7 @@ def run_product_post():
     if not dry_run:
         save_posted_code(item["itemCode"], posted)
         advance_keyword_rotation(keyword_index, keywords)
+        save_latest_item(item, affiliate_url)
 
 
 if __name__ == "__main__":
