@@ -33,7 +33,8 @@ LATEST_ITEM_LOG = Path("latest_item.json")
 
 # どのプラットフォームに投稿するか
 ENABLE_X = True
-ENABLE_INSTAGRAM = False  # 画像を公開URLで用意できるようになったらTrueに
+# 環境変数 ENABLE_INSTAGRAM=true でInstagram投稿を有効化できる
+ENABLE_INSTAGRAM = os.environ.get("ENABLE_INSTAGRAM", "false").lower() == "true"
 
 # 商品紹介ばかりだと「似たような投稿の繰り返し」でスパム判定されるリスクがあるため、
 # N回に1回はオリジナルの節約Tips投稿（商品紹介なし）を挟む
@@ -226,11 +227,15 @@ def run_product_post():
         print("----- Instagram投稿文 -----")
         print(ig_caption)
         if not dry_run:
-            # 画像は事前にどこかで公開URL化しておく必要がある
+            # 楽天の商品画像URLはそのまま公開URLとして使えるため、別途ホスティング不要
             image_url = item.get("mediumImageUrls", [{}])[0].get("imageUrl")
             if image_url:
-                result = post_to_instagram.post_image(image_url, ig_caption)
-                print("Instagramへ投稿完了:", result)
+                try:
+                    result = post_to_instagram.post_image(image_url, ig_caption)
+                    print("Instagramへ投稿完了:", result)
+                except Exception as e:
+                    # Instagram側の失敗でXの投稿や状態保存まで巻き込まれないようにする
+                    print(f"Instagramへの投稿に失敗しました（Xへの投稿には影響ありません）: {e}")
             else:
                 print("画像URLが取得できなかったためInstagram投稿をスキップしました。")
 
