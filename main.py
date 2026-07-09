@@ -162,6 +162,8 @@ def run_product_post():
     posted = load_posted_codes()
 
     keywords = get_keyword_list()
+    print(f"[DEBUG] RAKUTEN_KEYWORDS環境変数の生値: {os.environ.get('RAKUTEN_KEYWORDS')!r}")
+    print(f"[DEBUG] 解釈されたキーワードリスト: {keywords}")
     keyword, keyword_index = peek_current_keyword()
     print(f"今回の検索キーワード: {keyword}")
 
