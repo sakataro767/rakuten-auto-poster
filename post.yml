@@ -38,9 +38,9 @@ jobs:
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_SITE_URL: ${{ secrets.RAKUTEN_SITE_URL }}
-          RAKUTEN_KEYWORDS: "美容品,ふるさと納税,飲料品,家電,日用品,棚,ラック,酒"
-          RAKUTEN_MIN_PRICE: "3000"
-          RAKUTEN_MAX_PRICE: "30000"
+          RAKUTEN_KEYWORDS: "ふるさと納税,省エネ家電,洗剤 詰め替え,マネー本,節約 本"
+          RAKUTEN_MIN_PRICE: ""
+          RAKUTEN_MAX_PRICE: "50000"
           DRY_RUN: "false"
           REQUIRE_APPROVAL: "false"
           ORIGINAL_TIP_EVERY_N: "3"
