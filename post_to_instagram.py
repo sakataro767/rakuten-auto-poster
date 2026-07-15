@@ -17,7 +17,7 @@ import os
 import time
 import requests
 
-GRAPH_BASE = "https://graph.facebook.com/v19.0"
+GRAPH_BASE = "https://graph.facebook.com/v21.0"
 
 
 def post_image(image_url, caption):
@@ -38,7 +38,9 @@ def post_image(image_url, caption):
         },
         timeout=30,
     )
-    create_resp.raise_for_status()
+    if not create_resp.ok:
+        # エラーの詳細（Metaが返す具体的な原因）をそのまま例外メッセージに含める
+        raise RuntimeError(f"メディアコンテナ作成に失敗: {create_resp.status_code} {create_resp.text}")
     creation_id = create_resp.json()["id"]
 
     # 処理完了を少し待つ（画像取得・エンコードに数秒かかることがある）
@@ -53,7 +55,8 @@ def post_image(image_url, caption):
         },
         timeout=30,
     )
-    publish_resp.raise_for_status()
+    if not publish_resp.ok:
+        raise RuntimeError(f"公開処理に失敗: {publish_resp.status_code} {publish_resp.text}")
     return publish_resp.json()
 
 
